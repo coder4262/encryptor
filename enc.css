@@ -1,0 +1,5 @@
+
+body { font-family: system-ui, Arial, sans-serif; padding: 16px; }
+textarea {color: #02DEF8; background-color: #000; text-shadow: 0 0 2px #02DEF8;}
+button { margin-right: 8px; }
+:root, textarea, button { text-align: center; font-size: 35px; }
