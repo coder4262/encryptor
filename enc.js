@@ -12,7 +12,7 @@ function bin(value) {
   } else {
     throw new TypeError("bin() works with integers or strings only");
   }
-  function unbin(value) {
+function unbin(value) {
   if (typeof value === "string" && /^[01 ]+$/.test(value)) {
     const parts = value.trim().split(" ");
     if (parts.length === 1) {
@@ -24,7 +24,6 @@ function bin(value) {
     throw new TypeError("unbin() works with binary strings only");
   }
 }
-
 function encrypt(){
       const plain = document.querySelector("#input").value;
       const output = btoa(plain);
