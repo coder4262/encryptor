@@ -1,4 +1,6 @@
-export function bin(value) {
+/* 
+This is not actually used but is still functionall. bin() to encode unbin() to decode. */
+function bin(value) {
   if (typeof value === "number" && Number.isInteger(value)) {
     return value.toString(2);
   } else if (typeof value === "string") {
@@ -8,9 +10,7 @@ export function bin(value) {
   } else {
     throw new TypeError("bin() works with integers or strings only");
   }
-}
-
-export function unbin(value) {
+  function unbin(value) {
   if (typeof value === "string" && /^[01 ]+$/.test(value)) {
     const parts = value.trim().split(" ");
     if (parts.length === 1) {
@@ -23,17 +23,15 @@ export function unbin(value) {
   }
 }
 
-export function encrypt(){
+function encrypt(){
       const plain = document.querySelector("#input").value;
-      const reversed = plain.split("").reverse().join("");
-      const output = btoa(bin(reversed));
+      const output = btoa(plain);
       document.querySelector("#return").textContent = `Encrypted:${output}`;
     }
-export function decrypt(){
+function decrypt(){
       const cipher = document.querySelector("#input").value;
       try {
         const decoded = atob(cipher);
-        const output = unbin(decoded.split("").reverse().join(""));
         document.querySelector("#return").textContent = `Decrypted:${output}`;
       } catch (e) {
         document.querySelector("#return").textContent = "Invalid Base64 input";
