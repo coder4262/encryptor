@@ -1,5 +1,7 @@
 /* 
 This is not actually used but is still functionall. bin() to encode unbin() to decode. */
+// this import's the needed function.
+import {element} from "./create_element.js";
 function bin(value) {
   if (typeof value === "number" && Number.isInteger(value)) {
     return value.toString(2);
