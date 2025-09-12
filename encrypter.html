@@ -4,45 +4,19 @@
   <meta charset="UTF-8" />
   <title>Encrypter & Decrypter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="enc.css">
   <style>
-    body { 
-      font-family: system-ui, Arial, sans-serif; 
-      padding: 16px; 
-    }
-    textarea { 
-      width: 100%; 
-      max-width: 520px; 
-      height: 90px; 
-    }
-    button { 
-      margin-right: 8px; 
-    }
   </style>
-  <script>
-    function encrypt(){
-      const plain = document.querySelector("#input").value;
-      const reversed = plain.split("").reverse().join("");
-      const output = btoa(reversed);
-      document.querySelector("#return").textContent = `Encrypted:${output}`;
-    }
-    function decrypt(){
-      const cipher = document.querySelector("#input").value;
-      try {
-        const decoded = atob(cipher);
-        const output = decoded.split("").reverse().join("");
-        document.querySelector("#return").textContent = `Decrypted:${output}`;
-      } catch (e) {
-        document.querySelector("#return").textContent = "Invalid Base64 input";
-      }
-    }
+  <script src="enc.js">
   </script>
 </head>
 <body>
   <h1 style="color:rgb(99,255,2);">Encrypter & Decrypter</h1>
   <textarea id="input" placeholder="Type text to encrypt, or Base64 to decrypt"></textarea>
   <br><br>
-  <button type="button" onclick="encrypt_true()">Encrypt</button>
-  <button type="button" onclick="decrypt_true()">Decrypt</button>
+  <button type="button" onclick="encrypt()">Encrypt</button>
+  <button type="button" onclick="decrypt()">Decrypt</button>
   <p id="return"></p>
 </body>
 </html>
+
