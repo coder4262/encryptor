@@ -5,19 +5,60 @@
   <title>Encrypter & Decrypter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="enc.css">
-  <style>
-  </style>
   <script type="module">
+    // Optional import (make sure create_element.js exists in same folder)
+    import {element} from "./create_element.js";
+
+    function bin(value) {
+      if (typeof value === "number" && Number.isInteger(value)) {
+        return value.toString(2);
+      } else if (typeof value === "string") {
+        return value.split("")
+          .map(char => char.charCodeAt(0).toString(2).padStart(8, "0"))
+          .join(" ");
+      } else {
+        throw new TypeError("bin() works with integers or strings only");
+      }
+    }
+
+    function unbin(value) {
+      if (typeof value === "string" && /^[01 ]+$/.test(value)) {
+        const parts = value.trim().split(" ");
+        if (parts.length === 1) {
+          return parseInt(parts[0], 2);
+        } else {
+          return parts.map(b => String.fromCharCode(parseInt(b, 2))).join("");
+        }
+      } else {
+        throw new TypeError("unbin() works with binary strings only");
+      }
+    }
+
+    function encrypt() {
+      const plain = document.querySelector("#input").value;
+      const output = btoa(plain);
+      document.querySelector("#return").textContent = `Encrypted: ${output}`;
+    }
+
+    function decrypt() {
+      const cipher = document.querySelector("#input").value;
+      try {
+        const decoded = atob(cipher);
+        document.querySelector("#return").textContent = `Decrypted: ${decoded}`;
+      } catch (e) {
+        document.querySelector("#return").textContent = "Invalid Base64 input";
+      }
+    }
+    window.encrypt = encrypt;
+    window.decrypt = decrypt;
   </script>
 </head>
 <body>
   <h1 style="color:rgb(99,255,2);">Encrypter & Decrypter</h1>
   <textarea id="input" placeholder="Type text to encrypt, or Base64 to decrypt"></textarea>
   <br><br>
-  <button type="button" onclick="encrypt()">Encrypt</button>
-  <button type="button" onclick="decrypt()">Decrypt</button>
+  <button onclick="encrypt()">Encrypt</button>
+  <button onclick="decrypt()">Decrypt</button>
   <p id="return"></p>
 </body>
 </html>
-
-
