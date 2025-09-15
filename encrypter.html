@@ -4,98 +4,34 @@
   <meta charset="UTF-8" />
   <title>Encrypter & Decrypter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="enc.css">
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; max-width: 600px; height: 120px; }
+    button { margin-right: 8px; }
+    #return { white-space: pre-wrap; word-break: break-all; }
+  </style>
   <script type="module">
-    // Optional import (make sure create_element.js exists in same folder)
-    import {element} from "./create_element.js";
-/*
-    function bin(value) {
-      if (typeof value === "number" && Number.isInteger(value)) {
-        return value.toString(2);
-      } else if (typeof value === "string") {
-        return value.split("")
-          .map(char => char.charCodeAt(0).toString(2).padStart(8, "0"))
-          .join(" ");
-      } else {
-        throw new TypeError("bin() works with integers or strings only");
-      }
-    }
-
-    function unbin(value) {
-      if (typeof value === "string" && /^[01 ]+$/.test(value)) {
-        const parts = value.trim().split(" ");
-        if (parts.length === 1) {
-          return parseInt(parts[0], 2);
-        } else {
-          return parts.map(b => String.fromCharCode(parseInt(b, 2))).join("");
-        }
-      } else {
-        throw new TypeError("unbin() works with binary strings only");
-      }
-    }
-
-    function encrypt() {
-      const plain = document.querySelector("#input").value;
-      const output = btoa(plain);
-      document.querySelector("#return").textContent = `Encrypted: ${output}`;
-    }
-
-    function decrypt() {
-      const cipher = document.querySelector("#input").value;
-      try {
-        const decoded = atob(cipher);
-        document.querySelector("#return").textContent = `Decrypted: ${decoded}`;
-      } catch (e) {
-        document.querySelector("#return").textContent = "Invalid Base64 input";
-      }
-    }
-    window.encrypt = encrypt;
-    window.decrypt = decrypt;*/
-    const crypto = require('crypto');
-
-const algorithm = 'aes-256-gcm';
-const password = `b'Y*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQv`;
-const output = document.querySelector("#return");
-const key = crypto.scryptSync(password, 'salt', 32);
-
-function encrypt() {
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(algorithm, key, iv);
-  
-  let encrypted = cipher.update(document.querySelector("input").value, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-
-  const tag = cipher.getAuthTag();
-  const output = `${iv.toString('hex')}:${encrypted}:${tag.toString('hex')}`
-  return.innerHTML = `Encrypted:${output}`;
-}
-
-function decrypt() {
-  const encryptedText = document.querySelector("input").value;
-  const parts = encryptedText.split(':');
-  const iv = Buffer.from(parts.shift(), 'hex');
-  const tag = Buffer.from(parts.pop(), 'hex');
-  const encrypted = parts.join(':');
-  
-  const decipher = crypto.createDecipheriv(algorithm, key, iv);
-  decipher.setAuthTag(tag);
-  
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-  
-  return.innerHTML = `Decrypted ${decrypted}`;
-}
-
+    const enc = new TextEncoder()
+    const dec = new TextDecoder()
+    function abToBase64(ab){const bytes=new Uint8Array(ab);let str="";for(let i=0;i<bytes.length;i++)str+=String.fromCharCode(bytes[i]);return btoa(str)}
+    function base64ToAb(b64){const str=atob(b64);const bytes=new Uint8Array(str.length);for(let i=0;i<str.length;i++)bytes[i]=str.charCodeAt(i);return bytes.buffer}
+    async function deriveKey(password,saltB64){const salt=saltB64?base64ToAb(saltB64):crypto.getRandomValues(new Uint8Array(16)).buffer;const keyMaterial=await crypto.subtle.importKey("raw",enc.encode(password),"PBKDF2",false,["deriveKey"]);const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:100000,hash:"SHA-256"},keyMaterial,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);return{key,saltB64:abToBase64(salt)}}
+    const outputEl=document.querySelector("#return")
+    const inputEl=document.querySelector("#input")
+    const PASSWORD="use-a-strong-password-here"
+    async function encrypt(){try{const plaintext=inputEl.value;if(!plaintext){outputEl.textContent="Please type something to encrypt.";return}const{key,saltB64}=await deriveKey(PASSWORD);const iv=crypto.getRandomValues(new Uint8Array(12));const ciphertext=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,enc.encode(plaintext));const result=`${saltB64}.${abToBase64(iv.buffer)}.${abToBase64(ciphertext)}`;outputEl.textContent=`Encrypted:\n${result}`}catch(e){outputEl.textContent=`Encrypt error: ${e.message||e}`}}
+    async function decrypt(){try{const input=inputEl.value.trim();const parts=input.split(".");if(parts.length!==3){outputEl.textContent="Invalid format. Expect salt.iv.ciphertext (base64).";return}const[saltB64,ivB64,cB64]=parts;const{key}=await deriveKey(PASSWORD,saltB64);const iv=new Uint8Array(base64ToAb(ivB64));const ciphertext=base64ToAb(cB64);const plaintextAb=await crypto.subtle.decrypt({name:"AES-GCM",iv},key,ciphertext);const plaintext=dec.decode(plaintextAb);outputEl.textContent=`Decrypted:\n${plaintext}`}catch(e){outputEl.textContent=`Decrypt error: ${e.message||e}`}}
+    globalThis.encrypt=encrypt
+    globalThis.decrypt=decrypt
   </script>
 </head>
 <body>
   <h1 style="color:rgb(99,255,2);">Encrypter & Decrypter</h1>
-  <textarea id="input" placeholder="Type text to encrypt, or Base64 to decrypt"></textarea>
+  <textarea id="input" placeholder="Type text to encrypt, or paste 'salt.iv.ciphertext' to decrypt"></textarea>
   <br><br>
   <button onclick="encrypt()">Encrypt</button>
   <button onclick="decrypt()">Decrypt</button>
   <p id="return"></p>
 </body>
 </html>
-
 
