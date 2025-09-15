@@ -8,7 +8,7 @@
   <script type="module">
     // Optional import (make sure create_element.js exists in same folder)
     import {element} from "./create_element.js";
-
+/*
     function bin(value) {
       if (typeof value === "number" && Number.isInteger(value)) {
         return value.toString(2);
@@ -50,7 +50,47 @@
       }
     }
     window.encrypt = encrypt;
-    window.decrypt = decrypt;
+    window.decrypt = decrypt;*/
+    const crypto = require('crypto');
+
+const algorithm = 'aes-256-gcm';
+const password = `b'Y*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQv`;
+
+const key = crypto.scryptSync(password, 'salt', 32);
+
+function encrypt(text) {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
+  
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+
+  const tag = cipher.getAuthTag();
+  return `${iv.toString('hex')}:${encrypted}:${tag.toString('hex')}`;
+}
+
+function decrypt(encryptedText) {
+  const parts = encryptedText.split(':');
+  const iv = Buffer.from(parts.shift(), 'hex');
+  const tag = Buffer.from(parts.pop(), 'hex');
+  const encrypted = parts.join(':');
+  
+  const decipher = crypto.createDecipheriv(algorithm, key, iv);
+  decipher.setAuthTag(tag);
+  
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  
+  return decrypted;
+}
+function enc(){
+  const encrypted = document.querySelector("#input").value
+  encrypt(encrypted)
+function dec(){
+  const encrypted = document.querySelector("#input").value;
+  decrypt(encrypted)
+}
+
   </script>
 </head>
 <body>
@@ -62,3 +102,4 @@
   <p id="return"></p>
 </body>
 </html>
+
