@@ -1,1 +1,176 @@
-<html lang="en"><head> <meta charset="UTF-8"> <title>Encrypter &amp; Decrypter</title> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <style> body { font-family: Arial, sans-serif; background-color: #121212; color: #e0e0e0; text-align: center; padding: 20px; } textarea { width: 80%; height: 100px; margin-top: 10px; background-color: #1e1e1e; color: #e0e0e0; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 16px; } button { margin: 10px; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; background-color: #6200ea; color: white; } button:hover { background-color: #3700b3; } #return { margin-top: 20px; font-weight: bold; } *{box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; -ms-box-sizing: border-box; -o-box-sizing: border-box; text-align:center; font-size: 62px; } </style></head><body> <h1 style="color:rgb(99,255,2);font-size:72px;">Encrypter &amp; Decrypter</h1> <textarea id="input" placeholder="Type text to encrypt, or paste iv:cipher to decrypt"></textarea> <br> <small style="font-size:12px;">scroll down for the encrypted/decrypted</small> <br> <button onclick="encrypt()">Encrypt</button> <button onclick="decrypt()">Decrypt</button> <p id="return"></p> <audio autoplay="" loop=""> <source src="enc.mp3" type="audio/mpeg"></audio> <script defer="true"> // Helper encoders const enc = new TextEncoder(); const dec = new TextDecoder(); function ab2b64(buf) { const bytes = new Uint8Array(buf); let bin = ""; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]); return btoa(bin); } function b642ab(b64) { const bin = atob(b64); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return bytes.buffer; } async function getKey(password) { // Derive a 256-bit key from password via SHA-256 const hash = await crypto.subtle.digest("SHA-256", enc.encode(password)); return crypto.subtle.importKey( "raw", hash, { name: "AES-GCM" }, false, ["encrypt", "decrypt"] ); } const password = "b'Y*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQvY*T&HEZriiBZry9cY>sl2J~6CoNTPBX9_MviAnisQv"; async function encrypt() { const out = document.querySelector("#return"); const text = document.querySelector("#input").value; try { const key = await getKey(password); const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for GCM const ciphertext = await crypto.subtle.encrypt( { name: "AES-GCM", iv }, key, enc.encode(text) ); const result = `${ab2b64(iv)}:${ab2b64(ciphertext)}`; out.textContent = `Encrypted: ${result}`; } catch (e) { out.textContent = `Encrypt error: ${e.message || e}`; } } async function decrypt() { const out = document.querySelector("#return"); const input = document.querySelector("#input").value.trim(); try { const [ivB64, ctB64] = input.split(":"); if (!ivB64 || !ctB64) throw new Error("Expected format iv:cipher (base64:base64)"); const key = await getKey(password); const iv = new Uint8Array(b642ab(ivB64)); const ciphertext = b642ab(ctB64); const plainBuf = await crypto.subtle.decrypt( { name: "AES-GCM", iv }, key, ciphertext ); out.textContent = `Decrypted: ${dec.decode(plainBuf)}`; } catch (e) { out.textContent = `Decrypt error: ${e.message || e}`; } } // Expose to buttons window.encrypt = encrypt; window.decrypt = decrypt; </script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Encrypter & Decrypter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      font-family: Arial, sans-serif;
+      color: #e0e0e0;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      color: rgb(2, 255, 48);
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 80%;
+      min-height: 100px;
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 5px;
+      padding: 12px;
+      font-size: 16px;
+      resize: vertical;
+    }
+
+    textarea[readonly] {
+      background-color: #2e2e2e;
+    }
+
+    .button-group {
+      margin: 20px 0;
+    }
+
+    button {
+      margin: 8px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #6200ea;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #3700b3;
+    }
+
+    .output p {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Encrypter & Decrypter</h1>
+
+  <textarea id="input" placeholder="Type text to encrypt, or paste iv:cipher to decrypt"></textarea>
+
+  <div class="button-group">
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    <button onclick="copyToClipboard()">Copy Output</button>
+    <button onclick="download()">Download Output</button>
+  </div>
+
+  <div class="output">
+    <p id="status"></p>
+    <textarea id="output" readonly></textarea>
+  </div>
+<!--
+  if you have a file called enc .mp3, clone this with git and uncomment it.
+  <audio autoplay loop>
+    <source src="enc.mp3" type="audio/mpeg" />
+  </audio>
+-->
+  <script>
+    const password = "48172648713465871346578341657834657814365873145874365847365";
+    const enc = new TextEncoder();
+    const dec = new TextDecoder();
+
+    function ab2b64(buf) {
+      return btoa(String.fromCharCode(...new Uint8Array(buf)));
+    }
+
+    function b642ab(b64) {
+      const bin = atob(b64);
+      return Uint8Array.from(bin, c => c.charCodeAt(0)).buffer;
+    }
+
+    async function getKey(pass) {
+      const hash = await crypto.subtle.digest("SHA-256", enc.encode(pass));
+      return crypto.subtle.importKey("raw", hash, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+    }
+
+    async function encrypt() {
+      const input = document.getElementById("input").value;
+      const output = document.getElementById("output");
+      const status = document.getElementById("status");
+
+      try {
+        const key = await getKey(password);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ciphertext = await crypto.subtle.encrypt(
+          { name: "AES-GCM", iv },
+          key,
+          enc.encode(input)
+        );
+        const result = `${ab2b64(iv)}:${ab2b64(ciphertext)}`;
+        status.textContent = "Encrypted:";
+        output.value = result;
+      } catch (err) {
+        status.textContent = "Encryption error:";
+        output.value = err.message || String(err);
+      }
+    }
+
+    async function decrypt() {
+      const input = document.getElementById("input").value.trim();
+      const output = document.getElementById("output");
+      const status = document.getElementById("status");
+
+      try {
+        const [ivB64, ctB64] = input.split(":");
+        if (!ivB64 || !ctB64) throw new Error("Invalid input format. Use iv:cipher");
+
+        const key = await getKey(password);
+        const iv = new Uint8Array(b642ab(ivB64));
+        const ciphertext = b642ab(ctB64);
+
+        const decrypted = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv },
+          key,
+          ciphertext
+        );
+        status.textContent = "Decrypted:";
+        output.value = dec.decode(decrypted);
+      } catch (err) {
+        status.textContent = "Decryption error:";
+        output.value = err.message || String(err);
+      }
+    }
+
+    async function copyToClipboard() {
+      const output = document.getElementById("output").value.trim();
+      if (output) {
+        await navigator.clipboard.writeText(output);
+        alert("Copied to clipboard!");
+      }
+    }
+
+    function download() {
+      const output = document.getElementById("output").value.trim();
+      if (!output) return;
+
+      const blob = new Blob([output], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "output.txt";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>
