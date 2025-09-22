@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Encrypter & Decrypter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <title>Encrypter &amp; Decrypter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
@@ -64,7 +62,7 @@
   </style>
 </head>
 <body>
-  <h1>Encrypter & Decrypter</h1>
+  <h1>Encrypter &amp; Decrypter</h1>
 
   <textarea id="input" placeholder="Type text to encrypt, or paste iv:cipher to decrypt"></textarea>
 
@@ -76,101 +74,15 @@
   </div>
 
   <div class="output">
-    <p id="status"></p>
-    <textarea id="output" readonly></textarea>
+    <p id="status">Decrypted:</p>
+    <textarea id="output" readonly=""></textarea>
   </div>
 <!--
-  if you have a file called enc .mp3, clone this with git and uncomment it.
-  <audio autoplay loop>
-    <source src="enc.mp3" type="audio/mpeg" />
+  if you have a file called enc .mp3, clone this with git and uncomment it. -->
+  <audio autoplay="" loop="">
+    <source src="enc.mp3" type="audio/mpeg">
   </audio>
--->
-  <script>
-    const password = "48172648713465871346578341657834657814365873145874365847365";
-    const enc = new TextEncoder();
-    const dec = new TextDecoder();
-
-    function ab2b64(buf) {
-      return btoa(String.fromCharCode(...new Uint8Array(buf)));
-    }
-
-    function b642ab(b64) {
-      const bin = atob(b64);
-      return Uint8Array.from(bin, c => c.charCodeAt(0)).buffer;
-    }
-
-    async function getKey(pass) {
-      const hash = await crypto.subtle.digest("SHA-256", enc.encode(pass));
-      return crypto.subtle.importKey("raw", hash, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
-    }
-
-    async function encrypt() {
-      const input = document.getElementById("input").value;
-      const output = document.getElementById("output");
-      const status = document.getElementById("status");
-
-      try {
-        const key = await getKey(password);
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const ciphertext = await crypto.subtle.encrypt(
-          { name: "AES-GCM", iv },
-          key,
-          enc.encode(input)
-        );
-        const result = `${ab2b64(iv)}:${ab2b64(ciphertext)}`;
-        status.textContent = "Encrypted:";
-        output.value = result;
-      } catch (err) {
-        status.textContent = "Encryption error:";
-        output.value = err.message || String(err);
-      }
-    }
-
-    async function decrypt() {
-      const input = document.getElementById("input").value.trim();
-      const output = document.getElementById("output");
-      const status = document.getElementById("status");
-
-      try {
-        const [ivB64, ctB64] = input.split(":");
-        if (!ivB64 || !ctB64) throw new Error("Invalid input format. Use iv:cipher");
-
-        const key = await getKey(password);
-        const iv = new Uint8Array(b642ab(ivB64));
-        const ciphertext = b642ab(ctB64);
-
-        const decrypted = await crypto.subtle.decrypt(
-          { name: "AES-GCM", iv },
-          key,
-          ciphertext
-        );
-        status.textContent = "Decrypted:";
-        output.value = dec.decode(decrypted);
-      } catch (err) {
-        status.textContent = "Decryption error:";
-        output.value = err.message || String(err);
-      }
-    }
-
-    async function copyToClipboard() {
-      const output = document.getElementById("output").value.trim();
-      if (output) {
-        await navigator.clipboard.writeText(output);
-        alert("Copied to clipboard!");
-      }
-    }
-
-    function download() {
-      const output = document.getElementById("output").value.trim();
-      if (!output) return;
-
-      const blob = new Blob([output], { type: "text/plain" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "output.txt";
-      link.click();
-      URL.revokeObjectURL(link.href);
-    }
+  <script defer src="enc.js">
   </script>
-</body>
-</html>
+
+</body></html>
