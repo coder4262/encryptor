@@ -1,6 +1,8 @@
-<html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8">
-  <title>Encrypter &amp; Decrypter</title>
+  <title>Encrypter & Decrypter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -59,30 +61,173 @@
       font-weight: bold;
       margin-top: 20px;
     }
+
+    .download-readme {
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
   <h1>Encrypter &amp; Decrypter</h1>
 
-  <textarea id="input" placeholder="Type text to encrypt, or paste iv:cipher to decrypt"></textarea>
+  <textarea id="input" placeholder="Type text to encrypt, or paste Base64 to decrypt"></textarea>
 
   <div class="button-group">
     <button onclick="encrypt()">Encrypt</button>
     <button onclick="decrypt()">Decrypt</button>
     <button onclick="copyToClipboard()">Copy Output</button>
     <button onclick="download()">Download Output</button>
+    <button onclick="downloadReadme()">Download README.md</button>
   </div>
 
   <div class="output">
     <p id="status">Decrypted:</p>
-    <textarea id="output" readonly=""></textarea>
+    <textarea id="output" readonly></textarea>
   </div>
-<!--
-  if you have a file called enc .mp3, clone this with git and uncomment it. -->
-  <audio autoplay="" loop="">
+
+  <!-- Optional background music -->
+  <audio autoplay loop>
     <source src="enc.mp3" type="audio/mpeg">
   </audio>
-  <script defer src="enc.js">
+
+  <script>
+    function encrypt() {
+      const input = document.getElementById('input').value;
+      if (!input.trim()) {
+        alert("Please enter some text to encrypt.");
+        return;
+      }
+      const encoded = btoa(unescape(encodeURIComponent(input)));
+      document.getElementById('output').value = encoded;
+      document.getElementById('status').innerText = 'Encrypted:';
+    }
+
+    function decrypt() {
+      const input = document.getElementById('input').value;
+      if (!input.trim()) {
+        alert("Please enter a Base64 string to decrypt.");
+        return;
+      }
+      try {
+        const decoded = decodeURIComponent(escape(atob(input)));
+        document.getElementById('output').value = decoded;
+        document.getElementById('status').innerText = 'Decrypted:';
+      } catch (e) {
+        alert("Invalid Base64 input.");
+      }
+    }
+
+    function copyToClipboard() {
+      const output = document.getElementById('output');
+      output.select();
+      document.execCommand('copy');
+      alert("Output copied to clipboard.");
+    }
+
+    function download() {
+      const content = document.getElementById('output').value;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'output.txt';
+      link.click();
+    }
+
+    function downloadReadme() {
+      const readmeContent = `
+# Encrypter
+
+This is a **Base64 Encrypter & Decrypter** built with simple HTML, CSS, and JavaScript.
+
+## 🔐 Features
+
+- Encrypt plain text into Base64 format.
+- Decrypt Base64 text back into readable format.
+- Copy the result to clipboard.
+- Download the encrypted/decrypted output.
+- Optional background music (if \`enc.mp3\` is present).
+
+---
+
+## 📄 Live Demo
+
+👉 [Open Encrypter](encrypter.html)
+
+---
+
+## 💻 Usage
+
+1. **Encrypting:**
+   - Type or paste your text into the input box.
+   - Click **Encrypt**.
+   - The output will be shown below.
+
+2. **Decrypting:**
+   - Paste a Base64 encoded string into the input box.
+   - Click **Decrypt**.
+   - The decoded message will appear in the output box.
+
+3. **Extras:**
+   - Click **Copy Output** to copy the result to clipboard.
+   - Click **Download Output** to download it as a \`.txt\` file.
+
+---
+
+## 🎵 Background Music (Optional)
+
+If you'd like background music to play while using the app:
+
+1. Clone this repository:
+   \`\`\`bash
+   git clone https://github.com/your-username/encrypter.git
+   cd encrypter
+   \`\`\`
+
+2. Download the \`enc.mp3\` file from [this link](https://github.com/user-attachments/files/22491442/enc.mp3).
+
+3. Place the file in the project root directory as \`enc.mp3\`.
+
+> ⚠️ Make sure the file is named exactly \`enc.mp3\`.
+
+---
+
+## 📁 Files
+
+| File         | Description                      |
+|--------------|----------------------------------|
+| \`encrypter.html\` | Main web interface             |
+| \`enc.js\`         | JavaScript logic (inlined)    |
+| \`enc.mp3\`        | *(Optional)* Background music  |
+
+---
+
+## ⚠️ Notes
+
+- This project uses **Base64 encoding**, which is **not secure for sensitive data**.
+- The \`bin()\` and \`unbin()\` functions are **not used** in this code.
+
+---
+
+## 🧠 Tech Stack
+
+- **HTML5**
+- **CSS3**
+- **JavaScript (Vanilla)**
+
+---
+
+## 📄 License
+
+This project is open source and free to use under the MIT License.
+      `.trim();
+
+      const blob = new Blob([readmeContent], { type: 'text/markdown' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'README.md';
+      link.click();
+    }
   </script>
 
-</body></html>
+</body>
+</html>
