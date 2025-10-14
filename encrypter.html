@@ -1,20 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="serif">
 <head>
-  <div class="meta meta-data>
-  <meta charset="UTF-8">
-  <!--<meta name
-    -->
-  </div>
   <title>Encrypter & Decrypter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!--
-  CSS code for styling.
-  -->
+  <script src="encryptor.js"></script>
+  <meta-data></meta-data>
+  <link rel="stylesheet" href="./serif.css">
   <style>
-  /*
-    px is used to work around the problem by rem
-  */
     body {
       margin: 0;
       padding: 0;
@@ -79,13 +70,9 @@
 </head>
 <body>
   <h1>Encrypter &amp; Decrypter</h1>
-  <!--
-  input
-  -->
+
   <textarea id="input" placeholder="Type text to encrypt, or paste Base64 to decrypt"></textarea>
-<!--
-  buttons
--->
+
   <div class="button-group">
     <button onclick="encrypt()">Encrypt</button>
     <button onclick="decrypt()">Decrypt</button>
@@ -93,9 +80,7 @@
     <button onclick="download()">Download Output</button>
     <button onclick="downloadReadme()">Download README.md</button>
   </div>
-<!--
-  output
--->
+
   <div class="output">
     <p id="status">Decrypted:</p>
     <textarea id="output" readonly></textarea>
@@ -105,13 +90,17 @@
   <audio autoplay loop>
     <source src="enc.mp3" type="audio/mpeg">
   </audio>
-<!--
-  js code
--->
+  <a download="https://cipher-craft-49f80da8.base44.app/">
+    download link
+  </a>
   <script>
-    /*
-    there are no comments except for this one because there is to much and i'm only 1 kid
-    */
+    if (navigator.onLine){
+      document.body.innerHTML = `
+      <pre style="color:red">
+        ERROR
+      </pre>
+    }
+    try{
     function encrypt() {
       const input = document.getElementById('input').value;
       if (!input.trim()) {
@@ -155,7 +144,8 @@
     }
 
     function downloadReadme() {
-      const readmeContent = `
+    try{
+      const readmeContent = 
 # Encrypter
 
 This is a **Base64 Encrypter & Decrypter** built with simple HTML, CSS, and JavaScript.
@@ -252,5 +242,4 @@ This project is open source and free to use under the MIT License.
 
 </body>
 </html>
-
 
