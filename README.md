@@ -3,7 +3,7 @@ This is a <code>base-64</code> encrypter.
 <hr>
 <b>The bin() and unbin() functions are not used in the code.</b><br>
 <a href="encrypter.html">link for encrypter:encrypter </a><br>
-<a href="https://cipher-craft-49f80da8.base44.app/">
+<a href="https://cipher-craft-copy-d79ec65a.base44.app">
   this is the version that can be downloaded
 </a><br>
 If you want music to play,clone this with git and create a file called enc.mp3 to put your file in.
